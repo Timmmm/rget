@@ -1,0 +1,11 @@
+[project]
+name = "rget"
+version = "0.1.0"
+description = "Cached downloads"
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+bindings = "bin"
