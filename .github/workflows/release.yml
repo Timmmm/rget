@@ -64,9 +64,9 @@ jobs:
           maturin build --release --strip --locked ${{ matrix.cargo_extra_flags }}
 
       - name: Upload wheel
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: artifacts-${{ matrix.os }}
           path: target/wheels/*.whl
 
   release:
@@ -82,10 +82,12 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          target/rget-linux-x86_64
-          target/rget-mac-arm64
-          target/rget-windows-x86_64.exe
-          target/wheels/*.whl
+          ubuntu-latest/rget-linux-x86_64
+          ubuntu-latest/wheels/*.whl
+          macos-latest/rget-mac-arm64
+          macos-latest/wheels/*.whl
+          windows-latest/rget-windows-x86_64.exe
+          windows-latest/wheels/*.whl
         fail_on_unmatched_files: true
         tag_name: ${{ inputs.version }}
         body: ${{ inputs.notes }}
