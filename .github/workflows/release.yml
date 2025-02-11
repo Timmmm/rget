@@ -58,7 +58,16 @@ jobs:
         shell: pwsh
         run: Move-Item -Path "${{ matrix.output_executable }}" -Destination "target/${{ matrix.output_executable_upload_as }}"
 
-      - name: Build wheel
+      - name: Build wheel (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python3 -m venv venv
+          venv\Scripts\Activate.ps1
+          python3 -m pip install maturin
+          maturin build --release --strip --locked ${{ matrix.cargo_extra_flags }}
+
+      - name: Build wheel (not Windows)
+        if: runner.os != 'Windows'
         run: |
           python3 -m venv venv
           source venv/bin/activate
