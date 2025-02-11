@@ -67,11 +67,13 @@ jobs:
       - name: Build wheel
         run: maturin build --release --strip --locked ${{ matrix.cargo_extra_flags }}
 
-      - name: Upload wheel
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-${{ matrix.os }}
-          path: target/wheels/*.whl
+          path: |
+            target/wheels/*.whl
+            target/${{ matrix.output_executable_upload_as }}
 
   release:
     needs: build
