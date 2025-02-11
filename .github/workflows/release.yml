@@ -60,7 +60,7 @@ jobs:
 
       - name: Build wheel
         run: |
-          pip3 install maturin
+          python3 -m pip install --user --break-system-packages maturin
           maturin build --release --strip --locked ${{ matrix.cargo_extra_flags }}
 
       - name: Upload wheel
