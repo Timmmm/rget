@@ -76,7 +76,8 @@ async fn download_no_cache(
 ) -> Result<()> {
     let response = reqwest::get(url)
         .await
-        .with_context(|| anyhow!("GET '{url}'"))?;
+        .with_context(|| anyhow!("GET '{url}'"))?
+        .error_for_status()?;
     download_response(response, save_to, extract_to, progress).await?;
     Ok(())
 }
@@ -112,7 +113,9 @@ async fn download_cache(
 
     let response = reqwest::get(url)
         .await
-        .with_context(|| anyhow!("GET '{url}'"))?;
+        .with_context(|| anyhow!("GET '{url}'"))?
+        .error_for_status()?;
+
     let Some(etag) = response.headers().get("etag") else {
         info!("Server did not send etag; cannot cache");
         download_response(response, save_to, extract_to, progress).await?;
