@@ -17,7 +17,9 @@ fork_stream = "0.1.0"
 futures = "0.3.31"
 indicatif = { version = "0.17.9", features = ["tokio"] }
 log = "0.4.22"
-reqwest = { version = "0.12.8", features = ["stream"] }
+# `native-tls-vendored` links with a vendored copy OpenSSL statically on Linux.
+# This means we don't depend on it being available during compilation or at runtime.
+reqwest = { version = "0.12.8", features = ["stream", "native-tls-vendored"] }
 rusqlite = { version = "0.32.1", features = ["bundled"] }
 tar = "0.4.42"
 tokio = { version = "1.40.0", features = ["full"] }
