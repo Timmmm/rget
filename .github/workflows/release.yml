@@ -1,17 +1,28 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - '*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version, e.g. 1.0.0'
+        required: true
+      notes:
+        description: 'Release notes'
+        required: false
+      prerelease:
+        description: 'Pre-release'
+        required: false
+        type: boolean
+      draft:
+        description: 'Draft'
+        required: false
+        type: boolean
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
-    permissions:
-      contents: write
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -20,13 +31,13 @@ jobs:
           - os: ubuntu-latest
             cargo_extra_flags: --target x86_64-unknown-linux-musl
             output_executable: target/x86_64-unknown-linux-musl/release/rget
-            output_executable_upload_as: rget-linux
+            output_executable_upload_as: rget-linux-x86_64
           - os: macos-latest
             output_executable: target/release/rget
-            output_executable_upload_as: rget-mac
+            output_executable_upload_as: rget-mac-arm64
           - os: windows-latest
             output_executable: target/release/rget.exe
-            output_executable_upload_as: rget-windows.exe
+            output_executable_upload_as: rget-windows-x86_64.exe
     steps:
       - uses: actions/checkout@v3
 
@@ -43,6 +54,10 @@ jobs:
       - name: Build
         run: cargo build --verbose --release --locked ${{ matrix.cargo_extra_flags }}
 
+      - name: Rename Output
+        shell: pwsh
+        run: Move-Item -Path "${{ matrix.output_executable }}" -Destination "target/${{ matrix.output_executable_upload_as }}"
+
       - name: Build wheel
         run: |
           pip3 install maturin
@@ -54,14 +69,25 @@ jobs:
           name: wheels
           path: target/wheels/*.whl
 
-      - name: Rename Output
-        shell: pwsh
-        run: Move-Item -Path "${{ matrix.output_executable }}" -Destination "target/${{ matrix.output_executable_upload_as }}"
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: "target/${{ matrix.output_executable_upload_as }}"
-          fail_on_unmatched_files: true
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      # Required to create a release.
+      contents: write
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+    - name: Create release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          target/rget-linux-x86_64
+          target/rget-mac-arm64
+          target/rget-windows-x86_64.exe
+          target/wheels/*.whl
+        fail_on_unmatched_files: true
+        tag_name: ${{ inputs.version }}
+        body: ${{ inputs.notes }}
+        prerelease: ${{ inputs.prerelease }}
+        draft: ${{ inputs.draft }}
