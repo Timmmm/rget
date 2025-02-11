@@ -58,11 +58,11 @@ jobs:
         shell: pwsh
         run: Move-Item -Path "${{ matrix.output_executable }}" -Destination "target/${{ matrix.output_executable_upload_as }}"
 
-      - name: Install cargo-binstall
-        uses: cargo-bins/cargo-binstall@main
+      - name: Setup Python
+        uses: actions/setup-python@v5
 
       - name: Install Maturin
-        run: cargo binstall maturin
+        run: python3 -m pip install maturin
 
       - name: Build wheel
         run: maturin build --release --strip --locked ${{ matrix.cargo_extra_flags }}
@@ -88,12 +88,12 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          ubuntu-latest/rget-linux-x86_64
-          ubuntu-latest/wheels/*.whl
-          macos-latest/rget-mac-arm64
-          macos-latest/wheels/*.whl
-          windows-latest/rget-windows-x86_64.exe
-          windows-latest/wheels/*.whl
+          artifacts-ubuntu-latest/rget-linux-x86_64
+          artifacts-ubuntu-latest/wheels/*.whl
+          artifacts-macos-latest/rget-mac-arm64
+          artifacts-macos-latest/wheels/*.whl
+          artifacts-windows-latest/rget-windows-x86_64.exe
+          artifacts-windows-latest/wheels/*.whl
         fail_on_unmatched_files: true
         tag_name: ${{ inputs.version }}
         body: ${{ inputs.notes }}
