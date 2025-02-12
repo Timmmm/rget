@@ -114,6 +114,18 @@ async fn test_download_with_caching() {
     assert!(status.success());
     assert_eq!(fs::read_to_string(&output_file).unwrap(), "Response data with no etag.");
 
+    // Test 6: Verify 404 gives an error.
+    let output_file = downloads_dir.path().join("output6.txt");
+    let status = Command::new(env!("CARGO_BIN_EXE_rget"))
+        .arg("--cache")
+        .arg(format!("{}/404.txt", base_url))
+        .arg("--destination")
+        .arg(&output_file)
+        .status()
+        .await
+        .unwrap();
+    assert!(!status.success());
+
     // Stop the server
     server_handle.abort();
 }
