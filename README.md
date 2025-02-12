@@ -7,3 +7,12 @@ This is a very simple tool to download and optionally untar tarballs, but crucia
 ## Installation
 
 Download a binary release from [the Github releases page](https://github.com/Timmmm/rget/releases).
+
+## PyPI Release Process
+
+Make a release, download the wheels, then:
+
+    python3 -m pip install twine
+    python3 -m twine upload *.whl
+
+Get the API key from here: https://pypi.org/manage/account/token/
